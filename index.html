@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<head>
+
+    <style>
+        body {
+            background-color: rgb(40, 40, 40);
+        }
+        #clockWallTitle {
+            color: yellow;
+            text-align: center;
+        }
+        #clockWall {
+            display: grid;
+            grid-template-areas: 
+                "clock clock clock"
+                "clock clock clock"
+                "clock clock clock";
+            gap: 5px;
+            padding: 10px;
+        }
+
+        div.clockDiv {
+            background-color: grey;
+            text-align: center;
+            border: medium solid black;
+            border-radius: 1rem;
+            /*border-style: solid;
+            border-color: white;
+            border-width: thin;*/
+            grid-area: 'clock';
+        }
+
+        p.wallInfo {
+            color: yellow;
+            padding-left: 1em;
+        }
+
+        p.clockTitle {
+            font-weight: bold;
+            color: white;
+        }
+
+        p.inprogressClock {
+            font-weight: bold;
+            color: pink;
+        }
+
+        p.passedClock {
+            color: green;
+        }
+
+    </style>
+
+    <script>
+        let clockRefreshRate = 500;
+
+        function showPassedDate(clockName) {
+            let tmpClock = document.getElementById(clockName);
+            tmpClock.innerHTML = "DATE PASSED!";
+            tmpClock.setAttribute("class", "passedClock");
+        }
+
+        function showUpcomingDate(clockName, days, hours, minutes, seconds) {
+            let tmpClock = document.getElementById(clockName);
+            tmpClock.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+        }
+
+        function setClockFaces() {
+            // getTime measures in milliseconds since epoch
+            let now = Date.now();
+
+            for (i in DATA) {
+                let clock = DATA[i];
+                let countDownDate = new Date(clock["date"]);
+
+                let delta = countDownDate - now;
+
+                if (delta < 0) {
+                    showPassedDate(clock["name"]);
+                }
+                else {
+                    var days = Math.floor(delta / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((delta % (1000 * 60)) / 1000);
+
+                    showUpcomingDate(clock["name"], days, hours, minutes, seconds);
+                }
+            }
+        }
+
+        //let timerID = setInterval(setClockFace, clockRefreshRate, dummyDate);
+        let wallID = setInterval(setClockFaces, clockRefreshRate);
+
+    </script>
+
+</head>
+
+<body>
+    <h1 id="clockWallTitle">Countdown Wall</h1>
+    <p class="wallInfo">Here are the important dates to me and the time leading up to them.</p>
+    <div id="clockWall"></div>
+    
+    <script>
+        // Fake loading json data and prepopulating page with clock faces
+        let DATA = [
+            {
+                "name": "JT's Birthday",
+                "date": "August 19, 2022"
+            },
+            {
+                "name": "Akash's Birthday",
+                "date": "June 10, 2022"
+            },
+            {
+                "name": "Brian's Birthday",
+                "date": "January 14 2022"
+            },
+            {
+                "name": "Cameron's Birthday",
+                "date": "December 26, 2022"
+            },
+            {
+                "name": "My Birthday!",
+                "date": "August 22, 2022 15:04:25"
+            },
+            {
+                "name": "Our Wedding Anniversary",
+                "date": "May 19, 2022"
+            },
+            {
+                "name": "Our Actual Anniversary",
+                "date": "October 10, 2022"
+            },
+            {
+                "name": "Sam's Birthday",
+                "date": "October 20 2022, 10:23:00"
+            },
+            {
+                "name": "Christmas",
+                "date": "December 25, 2022 20:00:00"
+            }
+        ];
+        
+        // Fix DATE PASSED to just add years to the date until the date is after now
+        let now = new Date();
+        DATA.map((obj) => {
+            let objDate = new Date(obj["date"]);
+            if (objDate.getFullYear() < now) {
+                objDate.setFullYear(now.getFullYear() + 1);
+                obj["date"] = objDate.toString();
+            }
+        });
+
+        // Sorting data array by date closest to current time
+        DATA = DATA.sort((a, b) => {
+            let aDate = new Date(a["date"]), bDate = new Date(b["date"]);
+            return aDate - bDate;
+        });
+
+        // Drawing each clock face from DATA array
+        let clockWallDiv = document.getElementById("clockWall");
+
+        for (i in DATA) {
+            let obj = DATA[i];
+
+            let clockTitle = document.createElement("p");
+            let newClock = document.createElement("p");
+            clockTitle.setAttribute("class", "clockTitle");
+            clockTitle.innerHTML = obj["name"];
+            newClock.setAttribute("class", "inprogressClock");
+            newClock.setAttribute("id", obj["name"]);
+            newClock.innerHTML = "TDB";
+
+            let clockDiv = document.createElement("div");
+            clockDiv.setAttribute("class", "clockDiv");
+            clockDiv.appendChild(clockTitle);
+            clockDiv.appendChild(newClock);
+
+            clockWallDiv.appendChild(clockDiv);
+        }
+
+    </script>
+
+</body>
+</html>
